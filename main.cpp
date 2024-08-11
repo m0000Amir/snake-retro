@@ -2,33 +2,27 @@
 #include "raylib.h"
 #include <iostream>
 
-using namespace std;
+
+Color green = {173, 204, 96, 255};
+Color darkGreen = {43, 51, 24, 255};
+
 
 int main() {
-    cout << "Start!" << endl;
+    std::cout << "Start!" << std::endl;
     InitWindow(750, 750, "Snake Retro");
+    SetTargetFPS(60);
+    
+    while (!WindowShouldClose()) { 
+        // Update
+
+        // Draw
+        BeginDrawing();
+        ClearBackground(green);
+        DrawText("AAAAAAAWelcome to Raylib 5.0!`", 190, 200, 20, darkGreen);
+        EndDrawing();
+    }
 
     CloseWindow();
-    // // Initialization
-    // const int screenWidth = 800;
-    // const int screenHeight = 600;
-    // InitWindow(screenWidth, screenHeight, "Raylib 5.0 - C++ Template");
-
-    // // Main game loop
-    // while (!WindowShouldClose()) { 
-    //     // Update
-
-    //     // Draw
-    //     BeginDrawing();
-    //     ClearBackground(RAYWHITE);
-    //     DrawText("AAAAAAAWelcome to Raylib 5.0!`", 190, 200, 20, LIGHTGRAY);
-    //     EndDrawing();
-    // }
-
-    // // De-Initialization
-    // CloseWindow(); 
-
-    // return 0;
 
     return 0;
 }
