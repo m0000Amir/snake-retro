@@ -15,6 +15,7 @@ float cellSize = 30;
 float cellCount = 25;
 float offSet = 75;
 
+
 double lastUpdateTime = 0;
 
 bool eventTriggered(double interval) {
@@ -84,13 +85,6 @@ public:
     }
 
     void draw() {
-        // DrawRectangle(
-        //     position.x * cellSize, 
-        //     position.y * cellSize, 
-        //     cellSize, 
-        //     cellSize, 
-        //     green
-        // );
         DrawTexture(
             texture, 
             offSet + position.x * cellSize, 
@@ -110,8 +104,47 @@ public:
 
 class Game {
 public:
+    int score = 0;
+    // bool gameIsOver = false;
+    bool isRunning = false;
+    // Snake snake = Snake();
+    // Food food = Food();
+    // Snake snake;
+    // Food food;
     Snake snake = Snake();
     Food food = Food();
+    Sound eatSound;
+    Sound wallSound;
+    Music ostMusic;
+
+    
+
+    Game() {
+        InitAudioDevice();
+        eatSound = LoadSound("sounds/eat.wav");
+        wallSound = LoadSound("sounds/wall.mp3");
+        ostMusic = LoadMusicStream("sounds/ost.wav");
+        PlayMusicStream(ostMusic);
+        
+    }
+
+    ~Game() {
+        UnloadSound(eatSound);
+        UnloadSound(wallSound);
+        UnloadMusicStream(ostMusic);
+        CloseAudioDevice();
+    }
+
+    // void init() {
+    //     snake = Snake();
+    //     food = Food();
+    // }
+
+    void turnOnSound() {
+        std::cout << "SOUND PLAY" << std::endl;
+        // PlayMusicStream(ostMusic);
+    }
+
     
     void draw() {
         food.draw();
@@ -123,12 +156,15 @@ public:
         checkCollisionWithFood();
         checkCollisionWithEdges();
         checkCollisionWithTail();
+        UpdateMusicStream(ostMusic); 
     }
 
     void checkCollisionWithFood() {
         if (Vector2Equals(snake.body[0], food.position)) {
             food.position = food.generateRandomPos();
             snake.eat();
+            PlaySound(eatSound);
+            score++;
         }
     }
 
@@ -155,6 +191,9 @@ public:
     void gameOver() {
         // snake.reset();
         std::cout << "GAME OVER!" << std::endl;
+        PlaySound(wallSound);
+        // gameIsOver = true;
+        isRunning = false;
     }
 };
 
@@ -166,34 +205,18 @@ int main() {
         "Snake Retro");
     SetTargetFPS(60);
 
-    // Food food = Food();
-
-    // Snake snake = Snake();
-
     Game game = Game();
+    game.turnOnSound();
+
+    // Button settings
+    float screenWidth = 2 * offSet + cellSize * cellCount;
+    float screenHeight = 2 * offSet + cellSize * cellCount;
+    Rectangle playButton = { screenWidth / 2 - 100, screenHeight / 2 - 25, 200, 50 };
+    Color buttonColor;
+    Color buttonTextColor;
+    
     
     while (!WindowShouldClose()) { 
-        // Update
-        if (eventTriggered(0.2)) {
-            game.update();
-        }
-
-        if (IsKeyPressed(KEY_UP) && game.snake.direction.y != 1) {
-            game.snake.direction = {0, -1};
-        }
-
-        if (IsKeyPressed(KEY_DOWN) && game.snake.direction.y != -1) {
-            game.snake.direction = {0, 1};
-        }
-
-        if (IsKeyPressed(KEY_RIGHT) && game.snake.direction.x != -1) {
-            game.snake.direction = {1, 0};
-        }
-
-        if (IsKeyPressed(KEY_LEFT) && game.snake.direction.x != 1) {
-            game.snake.direction = {-1, 0};
-        }
-
         // Draw
         BeginDrawing();
         ClearBackground(darkGreen);
@@ -205,15 +228,79 @@ int main() {
                 cellSize * cellCount + 10
             }, 
             5, 
-            green);
-        // food.draw();
-        // snake.draw();
-        game.draw();
+            green
+        );
         int fontSize = 40;
         const char *title = "SNAKE RETRO GAME";
         int textWidth = MeasureText(title, fontSize);
-        // int a = MeasureTextEx(title);
-        DrawText(title, (2*offSet + cellSize * cellCount - textWidth) / 2, 10, fontSize, green);
+
+        DrawText(
+            title, 
+            (2*offSet + cellSize * cellCount - textWidth) / 2, 
+            10, 
+            fontSize, 
+            green
+        );
+
+        // Update
+        Vector2 mousePoint = GetMousePosition();
+        if (CheckCollisionPointRec(mousePoint, playButton)) {
+            buttonColor = darkGreen;
+            buttonTextColor = green;
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                game.isRunning = true; 
+                // gameStarted = true;  // Start the game when the button is clicked
+            }
+        } else {
+            buttonColor = green;
+            buttonTextColor = darkGreen;
+        }
+        
+        if (!game.isRunning) {
+            DrawRectangleRec(playButton, buttonColor);
+            DrawText(
+                "Play", 
+                playButton.x + 75, 
+                playButton.y + 10, 
+                20, 
+                buttonTextColor
+            );
+        } else {
+            game.draw();
+            if (eventTriggered(0.2)) {
+                game.update();
+            }
+
+            if (IsKeyPressed(KEY_UP) && game.snake.direction.y != 1) {
+                game.snake.direction = {0, -1};
+            }
+
+            if (IsKeyPressed(KEY_DOWN) && game.snake.direction.y != -1) {
+                game.snake.direction = {0, 1};
+            }
+
+            if (IsKeyPressed(KEY_RIGHT) && game.snake.direction.x != -1) {
+                game.snake.direction = {1, 0};
+            }
+
+            if (IsKeyPressed(KEY_LEFT) && game.snake.direction.x != 1) {
+                game.snake.direction = {-1, 0};
+            }
+
+            
+            
+            // DrawText("Game Started!", screenWidth / 2 - 100, screenHeight / 2 - 10, 20, DARKGREEN);
+        };
+
+        DrawText(
+            TextFormat("Score: %i", game.score),
+            offSet - 5,
+            offSet + cellCount * cellSize + 10,
+            40,
+            green
+        );
+
+
         EndDrawing();
     }
 
