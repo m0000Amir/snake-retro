@@ -1,6 +1,7 @@
 #include "raylib.h"
 #include "Game.hpp"
 #include "utils.hpp"
+#include "GameScreen.hpp"
 #include <iostream>
 
 #include <raymath.h>
@@ -14,7 +15,8 @@ int main()
         "Snake Retro");
     SetTargetFPS(60);
     
-    Game game;
+    GameScreen currentScreen = GameScreen::MENU;
+    Game game(&currentScreen);
 
     // Button settings
     float screenWidth = 2 * OFFSET + CELL_SIZE * CELL_COUNT;
@@ -43,47 +45,77 @@ int main()
             SNAKE_GREEN);
 
         Vector2 mousePoint = GetMousePosition();
-        Color buttonColor = CheckCollisionPointRec(mousePoint, playButton)
-                                ? SNAKE_DARK_GREEN
-                                : SNAKE_GREEN;
-        Color buttonTextColor = colorsEqual(buttonColor, SNAKE_DARK_GREEN)
-                                    ? SNAKE_GREEN
-                                    : SNAKE_DARK_GREEN;
 
-        if (!game.isRunning)
+        switch (currentScreen)
         {
-            DrawRectangleRec(playButton, buttonColor);
-            DrawText("Play", playButton.x + 75, playButton.y + 10, 20, buttonTextColor);
+            case GameScreen::MENU:
+            {
+                Color buttonColor = CheckCollisionPointRec(mousePoint, playButton)
+                    ? SNAKE_DARK_GREEN
+                    : SNAKE_GREEN;
+                Color buttonTextColor = colorsEqual(buttonColor, SNAKE_DARK_GREEN)
+                    ? SNAKE_GREEN
+                    : SNAKE_DARK_GREEN;
 
-            if (CheckCollisionPointRec(mousePoint, playButton) &&
-                IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-            {
-                game.isRunning = true;
-            }
-        }
-        else
-        {
-            game.draw();
-            if (eventTriggered(0.2))
-            {
-                game.update();
+                DrawRectangleRec(playButton, buttonColor);
+                DrawText("Play", playButton.x + 75, playButton.y + 10, 20, buttonTextColor);
+    
+                if (CheckCollisionPointRec(mousePoint, playButton) &&
+                    IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+                {
+                    game.reset();
+                    currentScreen  = GameScreen::GAMEPLAY;
+                }
+
+                break;
+                      
             }
 
-            if (IsKeyPressed(KEY_UP) && game.snake.direction.y != 1)
+            case GameScreen::GAMEPLAY:
             {
-                game.snake.direction = {0, -1};
+                game.draw();
+                if (eventTriggered(0.2))
+                {
+                    game.update();
+                }
+    
+                if (IsKeyPressed(KEY_UP) && game.snake.direction.y != 1)
+                {
+                    game.snake.direction = {0, -1};
+                }
+                if (IsKeyPressed(KEY_DOWN) && game.snake.direction.y != -1)
+                {
+                    game.snake.direction = {0, 1};
+                }
+                if (IsKeyPressed(KEY_RIGHT) && game.snake.direction.x != -1)
+                {
+                    game.snake.direction = {1, 0};
+                }
+                if (IsKeyPressed(KEY_LEFT) && game.snake.direction.x != 1)
+                {
+                    game.snake.direction = {-1, 0};
+                }
+                break;
             }
-            if (IsKeyPressed(KEY_DOWN) && game.snake.direction.y != -1)
+            
+
+            case GameScreen::GAME_OVER:
             {
-                game.snake.direction = {0, 1};
-            }
-            if (IsKeyPressed(KEY_RIGHT) && game.snake.direction.x != -1)
-            {
-                game.snake.direction = {1, 0};
-            }
-            if (IsKeyPressed(KEY_LEFT) && game.snake.direction.x != 1)
-            {
-                game.snake.direction = {-1, 0};
+                DrawText(
+                    "GAME OVER!", 
+                    screenWidth / 2 - 100,
+                    screenHeight / 2,
+                    40,
+                    RED
+                );
+                if (IsKeyPressed(KEY_ENTER))
+                {
+                    // Restart
+                    // game = Game(&currentScreen);
+                    currentScreen = GameScreen::MENU;
+                }
+                break;
+                
             }
         }
 

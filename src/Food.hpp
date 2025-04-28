@@ -14,4 +14,5 @@ public:
 
     void draw();
     Vector2 generateRandomPos();
+    void reset();
 };

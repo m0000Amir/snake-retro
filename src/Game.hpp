@@ -5,6 +5,8 @@
 #include "raylib.h"
 #include <raymath.h>
 
+enum class GameScreen; 
+
 class Game
 {
 public:
@@ -16,11 +18,14 @@ public:
     Sound wallSound;
     Music ostMusic;
 
-    Game();
+    GameScreen* screenState;
+
+    Game(GameScreen* screenState);
     ~Game();
 
     void draw();
     void update();
+    void reset();
 
 private:
     void checkCollisionWithFood();

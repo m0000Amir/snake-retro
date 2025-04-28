@@ -2,7 +2,7 @@
 
 Food::Food(): position(generateRandomPos())
 {
-    Image image = LoadImage("assets/graphics/food3.png");
+    Image image = LoadImage("../assets/graphics/food.png");
     texture = LoadTextureFromImage(image);
     UnloadImage(image);
 }
@@ -27,4 +27,13 @@ Vector2 Food::generateRandomPos()
     float x = GetRandomValue(0, CELL_COUNT - 1);
     float y = GetRandomValue(0, CELL_COUNT - 1);
     return Vector2{x, y};
+}
+
+void Food::reset()
+{
+    UnloadTexture(texture);   // free old texture
+    position = generateRandomPos(); // random new position
+    Image image = LoadImage("../assets/graphics/food.png");
+    texture = LoadTextureFromImage(image);
+    UnloadImage(image);
 }

@@ -1,8 +1,10 @@
+#include "GameScreen.hpp"
 #include "Game.hpp"
 #include "utils.hpp"
 #include <iostream>
 
-Game::Game()
+Game::Game(GameScreen* screenState)
+    : screenState(screenState)
 {
     InitAudioDevice();
     eatSound = LoadSound("../assets/sounds/eat.wav");
@@ -69,5 +71,17 @@ void Game::gameOver()
 {
     std::cout << "GAME OVER!" << std::endl;
     PlaySound(wallSound);
-    isRunning = false;
+    // isRunning = false;
+    if (screenState) 
+        *screenState = GameScreen::GAME_OVER; 
 }
+
+void Game::reset()
+{
+    score = 0;
+    isRunning = false;
+
+    snake = Snake(); // recreate new snake
+    food.reset();;   // recreate new food
+}
+
